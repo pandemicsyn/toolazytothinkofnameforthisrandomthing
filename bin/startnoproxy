@@ -1,0 +1,5 @@
+#!/bin/bash
+
+swift-init account start
+swift-init container start
+swift-init object start

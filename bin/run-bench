@@ -1,0 +1,69 @@
+#!/bin/bash
+
+OLD="0bba07111f9834599f5fb8c3c8f5a72e1ea22a1d"
+NEW="master"
+RUNS=5
+
+sudo swift-init all stop
+sleep 1
+
+cd /root/swift
+git checkout $OLD
+sudo python setup.py clean
+sudo python setup.py develop
+
+sudo resetswift
+sudo swift-init all stop
+sleep 2
+sudo swift-init start main
+sleep 2
+
+echo "`date` - Starting swiftly test of $OLD"
+for i in `seq 5`; do
+    swiftly -A http://127.0.0.1:8080/auth/v1.0 -U test:tester -K testing ping -c 500
+done
+echo "`date` - swiftly done"
+
+sudo resetswift
+sudo swift-init all stop
+sleep 2
+sudo swift-init start main
+sleep 2
+
+echo "`date` - Starting swift-bench --saio of $OLD"
+for i in `seq 5`; do
+    /root/swift-bench/bin/swift-bench --saio
+done
+echo "`date` - swift-bench done"
+
+echo "Switching to $NEW"
+
+cd /root/swift
+git checkout $NOW
+sudo python setup.py clean
+sudo python setup.py develop
+
+sudo resetswift
+sudo swift-init all stop
+sleep 2
+sudo swift-init start main
+sleep 2
+
+
+echo "`date` - Starting swiftly test of $NEW"
+for i in `seq 5`; do
+    swiftly -A http://127.0.0.1:8080/auth/v1.0 -U test:tester -K testing ping -c 500
+done
+echo "`date` - swiftly done"
+
+sudo resetswift
+sudo swift-init all stop
+sleep 2
+sudo swift-init start main
+sleep 2
+
+echo "`date` - Starting swift-bench --saio of $NEW"
+for i in `seq 5`; do
+    /root/swift-bench/bin/swift-bench --saio
+done
+echo "`date` - swift-bench done"
